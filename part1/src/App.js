@@ -1,27 +1,16 @@
-import { useState } from "react"
+import { useState } from 'react'
 
 const App = () => {
-  const [counter, setCounter] = useState(0);
-
-  // event handlers
-  const increaseByOne = () => setCounter(counter + 1);
-  const decreaseByOne = () => setCounter(counter - 1);
-  const reset = () => setCounter(0);
+  // save clicks of each button to its own state
+  const [good, setGood] = useState(0)
+  const [neutral, setNeutral] = useState(0)
+  const [bad, setBad] = useState(0)
 
   return (
-    <>
-      <Display counter={counter} />
-      <Button text="plus" onClickHandler={increaseByOne} />
-      <Button text="decrease" onClickHandler={decreaseByOne} />
-      <Button text="reset" onClickHandler={reset} />
-    </>
+    <div>
+      code here
+    </div>
   )
-
 }
 
-const Display = ({ counter }) => <div>{counter}</div>
-
-const Button = ({ text, onClickHandler }) =>
-  <button onClick={onClickHandler}>{text}</button>
-
-export default App;
+export default App
