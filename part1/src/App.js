@@ -18,13 +18,17 @@ const App = () => {
         neutralHandler={setNeutralHandler}
         badHandler={setBadHandler} />
 
-      <Stats title="Statistics"
+      <Statistics title="Statistics"
         state={{ good: good, neutral: neutral, bad: bad }} />
     </div>
   )
 }
 
-const Stats = ({ title, state }) => {
+const Statistics = ({ title, state }) => {
+  const all = state.good + state.bad + state.neutral;
+  const avergae = (all == 0) ? 0 : (state.good - state.bad) / all;
+  const positive = (all == 0) ? 0 : (100 * state.good / all);
+
   return (
     <div id="stats">
       <DisplayTitle title={title} />
@@ -32,6 +36,8 @@ const Stats = ({ title, state }) => {
       <SingleStat param="neutral" val={state.neutral} />
       <SingleStat param="bad" val={state.bad} />
 
+      <SingleStat param="average" val={avergae} />
+      <SingleStat param="positive" val={positive + '%'} />
     </div>
   )
 }
