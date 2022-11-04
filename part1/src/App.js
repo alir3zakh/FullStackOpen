@@ -33,18 +33,23 @@ const Statistics = ({ title, state }) => {
     return (
       <div id="stats">
         <DisplayTitle title={title} />
-        <DisplaySingleLine param="No feedback given." />
+        <p>No feedback given.</p>
       </div>
     )
   } else {
     return (
       <div id="stats">
         <DisplayTitle title={title} />
-        <DisplaySingleLine param="good :" val={state.good} />
-        <DisplaySingleLine param="neutral :" val={state.neutral} />
-        <DisplaySingleLine param="bad :" val={state.bad} />
-        <DisplaySingleLine param="average :" val={avergae} />
-        <DisplaySingleLine param="positive :" val={positive + '%'} />
+        <table>
+          <tbody>
+            <StatisticLine param="good" value={state.good} />
+            <StatisticLine param="neutral" value={state.neutral} />
+            <StatisticLine param="bad" value={state.bad} />
+            <StatisticLine param="all" value={all} />
+            <StatisticLine param="average" value={avergae} />
+            <StatisticLine param="positive" value={positive + ' %'} />
+          </tbody>
+        </table>
       </div>
     )
   }
@@ -66,7 +71,12 @@ const Button = ({ text, handler }) => (
 )
 
 const DisplayTitle = ({ title }) => <h2>{title}</h2>
-const DisplaySingleLine = ({ param, val }) => <p>{param} {val} <br /></p>
+const StatisticLine = ({ param, value }) => (
+  <tr>
+    <td>{param}</td>
+    <td>{value}</td>
+  </tr>
+)
 
 
 export default App
