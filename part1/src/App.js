@@ -1,82 +1,33 @@
 import { useState } from 'react'
 
 const App = () => {
-  // save clicks of each button to its own state
-  const [good, setGood] = useState(0)
-  const [neutral, setNeutral] = useState(0)
-  const [bad, setBad] = useState(0)
+  const anecdotes = [
+    'If it hurts, do it more often.',
+    'Adding manpower to a late software project makes it later!',
+    'The first 90 percent of the code accounts for the first 10 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
+    'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
+    'Premature optimization is the root of all evil.',
+    'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
+    'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.'
+  ]
 
-  // handler functions
-  const setGoodHandler = () => setGood(good + 1)
-  const setNeutralHandler = () => setNeutral(neutral + 1)
-  const setBadHandler = () => setBad(bad + 1)
+  const [selected, setSelected] = useState(0)
 
-  return (
-    <div id="unicafe">
-      <Feedback title="Give Feedback"
-        goodHandler={setGoodHandler}
-        neutralHandler={setNeutralHandler}
-        badHandler={setBadHandler} />
-
-      <Statistics title="Statistics"
-        state={{ good: good, neutral: neutral, bad: bad }} />
-    </div>
-  )
-}
-
-const Statistics = ({ title, state }) => {
-  const all = state.good + state.bad + state.neutral;
-  const avergae = (state.good - state.bad) / all;
-  const positive = (100 * state.good / all);
-
-  if (all == 0) {
-    return (
-      <div id="stats">
-        <DisplayTitle title={title} />
-        <p>No feedback given.</p>
-      </div>
-    )
-  } else {
-    return (
-      <div id="stats">
-        <DisplayTitle title={title} />
-        <table>
-          <tbody>
-            <StatisticLine param="good" value={state.good} />
-            <StatisticLine param="neutral" value={state.neutral} />
-            <StatisticLine param="bad" value={state.bad} />
-            <StatisticLine param="all" value={all} />
-            <StatisticLine param="average" value={avergae} />
-            <StatisticLine param="positive" value={positive + ' %'} />
-          </tbody>
-        </table>
-      </div>
-    )
+  const anecdoteHandler = () => {
+    const randIndex = Math.floor(Math.random() * anecdotes.length)
+    setSelected(randIndex);
   }
-}
 
-const Feedback = (props) => {
   return (
-    <div id="feedback">
-      <DisplayTitle title={props.title} />
-      <Button text="good" handler={props.goodHandler} />
-      <Button text="neutral" handler={props.neutralHandler} />
-      <Button text="bad" handler={props.badHandler} />
+    <div>
+      <p>{anecdotes[selected]}</p>
+      <Button text="next anecdote" handlerFunc={anecdoteHandler} />
     </div>
   )
 }
 
-const Button = ({ text, handler }) => (
-  <button onClick={handler}>{text}</button>
-)
-
-const DisplayTitle = ({ title }) => <h2>{title}</h2>
-const StatisticLine = ({ param, value }) => (
-  <tr>
-    <td>{param}</td>
-    <td>{value}</td>
-  </tr>
-)
-
+const Button = ({handlerFunc, text}) => {
+  return <button onClick={handlerFunc}>{text}</button>
+}
 
 export default App
