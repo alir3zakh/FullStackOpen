@@ -26,25 +26,29 @@ const App = () => {
 
 const Statistics = ({ title, state }) => {
   const all = state.good + state.bad + state.neutral;
-  const avergae = (all == 0) ? 0 : (state.good - state.bad) / all;
-  const positive = (all == 0) ? 0 : (100 * state.good / all);
+  const avergae = (state.good - state.bad) / all;
+  const positive = (100 * state.good / all);
 
-  return (
-    <div id="stats">
-      <DisplayTitle title={title} />
-      <SingleStat param="good" val={state.good} />
-      <SingleStat param="neutral" val={state.neutral} />
-      <SingleStat param="bad" val={state.bad} />
-
-      <SingleStat param="average" val={avergae} />
-      <SingleStat param="positive" val={positive + '%'} />
-    </div>
-  )
+  if (all == 0) {
+    return (
+      <div id="stats">
+        <DisplayTitle title={title} />
+        <DisplaySingleLine param="No feedback given." />
+      </div>
+    )
+  } else {
+    return (
+      <div id="stats">
+        <DisplayTitle title={title} />
+        <DisplaySingleLine param="good :" val={state.good} />
+        <DisplaySingleLine param="neutral :" val={state.neutral} />
+        <DisplaySingleLine param="bad :" val={state.bad} />
+        <DisplaySingleLine param="average :" val={avergae} />
+        <DisplaySingleLine param="positive :" val={positive + '%'} />
+      </div>
+    )
+  }
 }
-
-const SingleStat = ({ param, val }) => (
-  <>{param}: {val} <br /></>
-)
 
 const Feedback = (props) => {
   return (
@@ -62,5 +66,7 @@ const Button = ({ text, handler }) => (
 )
 
 const DisplayTitle = ({ title }) => <h2>{title}</h2>
+const DisplaySingleLine = ({ param, val }) => <p>{param} {val} <br /></p>
+
 
 export default App
