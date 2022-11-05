@@ -30,6 +30,9 @@ const Course = ({ name, parts }) => {
     <div id="course">
       <Header title={name} />
       <Content parts={parts} />
+      <TotalExercises
+        exercises={parts.reduce((acc, part) =>
+          acc + part.exercises, 0)} />
     </div>
   )
 }
@@ -53,7 +56,15 @@ const Content = ({ parts }) => {
 }
 
 const Part = ({name, exercises}) => {
-  return <p>{name} {exercises}</p>
+  return (
+    <p>{name} {exercises}</p>
+  )
+}
+
+const TotalExercises = ({ exercises }) => {
+  return (
+    <b>Total of {exercises} exercises</b>
+  )
 }
 
 export default App;
