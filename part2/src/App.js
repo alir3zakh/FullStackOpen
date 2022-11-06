@@ -2,9 +2,12 @@ import { useState } from 'react'
 import Note from './components/Note'
 
 const App = (props) => {
+  //component states
   const [notes, setNotes] = useState(props.notes)
   const [newNote, setNewNote] = useState('initial note state')
+  const [showAll, setShowAll] = useState(true)
 
+  // event handlers
   const addNote = (event) => {
     event.preventDefault();
 
@@ -24,11 +27,21 @@ const App = (props) => {
     setNewNote(event.target.value)
   }
 
+  // other vars / functions
+  const notesToShow = (showAll ? notes :
+    notes.filter(note => note.important))
+
   return (
     <div>
       <h1>Notes</h1>
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
+      </div>
+
       <ul>
-        {notes.map(note =>
+        {notesToShow.map(note =>
           <Note key={note.id}
             note={note}
           />
