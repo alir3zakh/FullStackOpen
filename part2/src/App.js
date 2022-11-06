@@ -50,42 +50,67 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Filter searchInputHandler={searchInputHandler} />
+
+      <h3>Add a new</h3>
+      <PersonForm onSubmit={formSubmit}
+        newName={newName}
+        nameInputHandler={nameInputHandler}
+        newNumber={newNumber}
+        numberInputHandler={numberInputHandler}
+      />
+
+      <h3>Numbers</h3>
+      <Persons personsToShow={personsToShow} />
+    </div>
+  )
+}
+
+const Filter = ({ searchInputHandler }) => {
+  return (
+    <>
       <span>filter shown with</span>
       <input onChange={searchInputHandler} />
+    </>
+  )
+}
 
-      <h2>Add a new</h2>
-      <form onSubmit={formSubmit}>
-        <div>
-          name:
-          <input required
-            value={newName}
-            onChange={nameInputHandler} />
-        </div>
-        <div>
-          number:
-          <input required
-            value={newNumber}
-            onChange={numberInputHandler} />
+const PersonForm = (props) => {
+  return (
+    <form onSubmit={props.onSubmit}>
+      <div>
+        name:
+        <input required
+          value={props.newName}
+          onChange={props.nameInputHandler} />
+      </div>
+      <div>
+        number:
+        <input required
+          value={props.newNumber}
+          onChange={props.numberInputHandler} />
 
-        </div>
+      </div>
 
-        <div>
-          <button type="submit">add</button>
-        </div>
-      </form>
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  )
+}
 
-      <h2>Numbers</h2>
-      <table id="numbers">
-        <tbody>
-          {personsToShow.map(person =>
-            <tr key={person.name}>
-              <td>{person.name}</td>
-              <td>{person.number}</td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
+const Persons = ({ personsToShow }) => {
+  return (
+    <table id="numbers">
+      <tbody>
+        {personsToShow.map(person =>
+          <tr key={person.name}>
+            <td>{person.name}</td>
+            <td>{person.number}</td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   )
 }
 
