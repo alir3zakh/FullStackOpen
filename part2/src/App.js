@@ -2,9 +2,13 @@ import { useState } from 'react'
 
 const App = () => {
   const [persons, setPersons] = useState([
-    { name: 'Arto Hellas' }
+    {
+      name: 'Arto Hellas',
+      number: '040-44-5323523'
+    }
   ])
   const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
 
   //event handlers
   const formSubmit = (event) => {
@@ -18,15 +22,21 @@ const App = () => {
     }
 
     const newPerson = {
-      name: newName
+      name: newName,
+      number: newNumber,
     }
 
     setPersons(persons.concat(newPerson))
     setNewName('')
+    setNewNumber('')
   }
 
   const nameInputHandler = (event) => {
     setNewName(event.target.value)
+  }
+
+  const numberInputHandler = (event) => {
+    setNewNumber(event.target.value)
   }
 
   return (
@@ -35,8 +45,16 @@ const App = () => {
       <form onSubmit={formSubmit}>
         <div>
           name:
-          <input value={newName}
+          <input required
+            value={newName}
             onChange={nameInputHandler} />
+        </div>
+        <div>
+          number:
+          <input required
+            value={newNumber}
+            onChange={numberInputHandler} />
+
         </div>
 
         <div>
@@ -50,6 +68,7 @@ const App = () => {
           {persons.map(person =>
             <tr key={person.name}>
               <td>{person.name}</td>
+              <td>{person.number}</td>
             </tr>
           )}
         </tbody>
