@@ -9,7 +9,19 @@ const App = () => {
   //event handlers
   const formSubmit = (event) => {
     event.preventDefault()
-    setPersons(persons.concat({ name: newName }))
+
+    const namesList = persons.reduce((namesList, person) => namesList.concat(person.name), [])
+
+    if (namesList.includes(newName)) {
+      alert(`${newName} is already added to phonebook`)
+      return;
+    }
+
+    const newPerson = {
+      name: newName
+    }
+
+    setPersons(persons.concat(newPerson))
     setNewName('')
   }
 
