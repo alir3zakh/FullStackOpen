@@ -2,13 +2,14 @@ import { useState } from 'react'
 
 const App = () => {
   const [persons, setPersons] = useState([
-    {
-      name: 'Arto Hellas',
-      number: '040-44-5323523'
-    }
+    { name: 'Arto Hellas', number: '040-123456', id: 1 },
+    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
+    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
+    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
   ])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
+  const [nameFilter, setnameFilter] = useState('')
 
   //event handlers
   const formSubmit = (event) => {
@@ -39,9 +40,20 @@ const App = () => {
     setNewNumber(event.target.value)
   }
 
+  const searchInputHandler = (event) => {
+    setnameFilter(event.target.value)
+  }
+
+  const personsToShow = persons.filter(
+    person => person.name.startsWith(nameFilter))
+
   return (
     <div>
       <h2>Phonebook</h2>
+      <span>filter shown with</span>
+      <input onChange={searchInputHandler} />
+
+      <h2>Add a new</h2>
       <form onSubmit={formSubmit}>
         <div>
           name:
@@ -65,7 +77,7 @@ const App = () => {
       <h2>Numbers</h2>
       <table id="numbers">
         <tbody>
-          {persons.map(person =>
+          {personsToShow.map(person =>
             <tr key={person.name}>
               <td>{person.name}</td>
               <td>{person.number}</td>
