@@ -1,73 +1,122 @@
 import axios from 'axios'
 import { useState, useEffect } from 'react'
-import Note from './components/Note'
 
 const App = () => {
-  //component states
-  const [notes, setNotes] = useState([])
-  const [newNote, setNewNote] = useState('')
-  const [showAll, setShowAll] = useState(true)
+  const [persons, setPersons] = useState([])
+  const [newName, setNewName] = useState('')
+  const [newNumber, setNewNumber] = useState('')
+  const [nameFilter, setnameFilter] = useState('')
 
+  // loading inital state of persons
   useEffect(() => {
-    console.log('effect')
+    console.log('effect running')
     axios
-      .get('http://localhost:3001/notes')
+      .get('http://localhost:3001/persons')
       .then(response => {
-        console.log(response)
-        setNotes(response.data)
+        setPersons(response.data)
       })
-  }, []);
-  console.log('render', notes.length, 'notes');
+  }, [])
 
+  //event handlers
+  const formSubmit = (event) => {
+    event.preventDefault()
 
-  // event handlers
-  const addNote = (event) => {
-    event.preventDefault();
+    const namesList = persons.reduce((namesList, person) => namesList.concat(person.name), [])
 
-    const noteObject = {
-      id: notes.length + 1,
-      content: newNote,
-      date: new Date().toISOString(),
-      important: Math.random() < 0.5,
+    if (namesList.includes(newName)) {
+      alert(`${newName} is already added to phonebook`)
+      return;
     }
 
-    setNotes(notes.concat(noteObject))
-    setNewNote('')
+    const newPerson = {
+      name: newName,
+      number: newNumber,
+    }
+
+    setPersons(persons.concat(newPerson))
+    setNewName('')
+    setNewNumber('')
   }
 
-  const changeNoteHandle = (event) => {
-    console.log(event.target.value)
-    setNewNote(event.target.value)
+  const nameInputHandler = (event) => {
+    setNewName(event.target.value)
   }
 
-  // other vars / functions
-  const notesToShow = (showAll ? notes :
-    notes.filter(note => note.important))
+  const numberInputHandler = (event) => {
+    setNewNumber(event.target.value)
+  }
+
+  const searchInputHandler = (event) => {
+    setnameFilter(event.target.value)
+  }
+
+  const personsToShow = persons.filter(
+    person => person.name.startsWith(nameFilter))
 
   return (
     <div>
-      <h1>Notes</h1>
+      <h2>Phonebook</h2>
+      <Filter searchInputHandler={searchInputHandler} />
+
+      <h3>Add a new</h3>
+      <PersonForm onSubmit={formSubmit}
+        newName={newName}
+        nameInputHandler={nameInputHandler}
+        newNumber={newNumber}
+        numberInputHandler={numberInputHandler}
+      />
+
+      <h3>Numbers</h3>
+      <Persons personsToShow={personsToShow} />
+    </div>
+  )
+}
+
+const Filter = ({ searchInputHandler }) => {
+  return (
+    <>
+      <span>filter shown with</span>
+      <input onChange={searchInputHandler} />
+    </>
+  )
+}
+
+const PersonForm = (props) => {
+  return (
+    <form onSubmit={props.onSubmit}>
       <div>
-        <button onClick={() => setShowAll(!showAll)}>
-          show {showAll ? 'important' : 'all'}
-        </button>
+        name:
+        <input required
+          value={props.newName}
+          onChange={props.nameInputHandler} />
+      </div>
+      <div>
+        number:
+        <input required
+          value={props.newNumber}
+          onChange={props.numberInputHandler} />
+
       </div>
 
-      <ul>
-        {notesToShow.map(note =>
-          <Note key={note.id}
-            note={note}
-          />
+      <div>
+        <button type="submit">add</button>
+      </div>
+    </form>
+  )
+}
+
+const Persons = ({ personsToShow }) => {
+  return (
+    <table id="numbers">
+      <tbody>
+        {personsToShow.map(person =>
+          <tr key={person.name}>
+            <td>{person.name}</td>
+            <td>{person.number}</td>
+          </tr>
         )}
-      </ul>
-      <form onSubmit={addNote}>
-        <input
-          value={newNote}
-          onChange={changeNoteHandle}
-        />
-        <button type='submit'>save</button>
-      </form>
-    </div>
+      </tbody>
+    </table>
   )
 }
 
