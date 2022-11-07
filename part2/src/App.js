@@ -1,116 +1,60 @@
 import { useState } from 'react'
+import Note from './components/Note'
 
-const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
-  const [nameFilter, setnameFilter] = useState('')
+const App = (props) => {
+  //component states
+  const [notes, setNotes] = useState(props.notes)
+  const [newNote, setNewNote] = useState('initial note state')
+  const [showAll, setShowAll] = useState(true)
 
-  //event handlers
-  const formSubmit = (event) => {
-    event.preventDefault()
+  // event handlers
+  const addNote = (event) => {
+    event.preventDefault();
 
-    const namesList = persons.reduce((namesList, person) => namesList.concat(person.name), [])
-
-    if (namesList.includes(newName)) {
-      alert(`${newName} is already added to phonebook`)
-      return;
+    const noteObject = {
+      id: notes.length + 1,
+      content: newNote,
+      date: new Date().toISOString(),
+      important: Math.random() < 0.5,
     }
 
-    const newPerson = {
-      name: newName,
-      number: newNumber,
-    }
-
-    setPersons(persons.concat(newPerson))
-    setNewName('')
-    setNewNumber('')
+    setNotes(notes.concat(noteObject))
+    setNewNote('')
   }
 
-  const nameInputHandler = (event) => {
-    setNewName(event.target.value)
+  const changeNoteHandle = (event) => {
+    console.log(event.target.value)
+    setNewNote(event.target.value)
   }
 
-  const numberInputHandler = (event) => {
-    setNewNumber(event.target.value)
-  }
-
-  const searchInputHandler = (event) => {
-    setnameFilter(event.target.value)
-  }
-
-  const personsToShow = persons.filter(
-    person => person.name.startsWith(nameFilter))
+  // other vars / functions
+  const notesToShow = (showAll ? notes :
+    notes.filter(note => note.important))
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      <Filter searchInputHandler={searchInputHandler} />
-
-      <h3>Add a new</h3>
-      <PersonForm onSubmit={formSubmit}
-        newName={newName}
-        nameInputHandler={nameInputHandler}
-        newNumber={newNumber}
-        numberInputHandler={numberInputHandler}
-      />
-
-      <h3>Numbers</h3>
-      <Persons personsToShow={personsToShow} />
-    </div>
-  )
-}
-
-const Filter = ({ searchInputHandler }) => {
-  return (
-    <>
-      <span>filter shown with</span>
-      <input onChange={searchInputHandler} />
-    </>
-  )
-}
-
-const PersonForm = (props) => {
-  return (
-    <form onSubmit={props.onSubmit}>
+      <h1>Notes</h1>
       <div>
-        name:
-        <input required
-          value={props.newName}
-          onChange={props.nameInputHandler} />
-      </div>
-      <div>
-        number:
-        <input required
-          value={props.newNumber}
-          onChange={props.numberInputHandler} />
-
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
       </div>
 
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  )
-}
-
-const Persons = ({ personsToShow }) => {
-  return (
-    <table id="numbers">
-      <tbody>
-        {personsToShow.map(person =>
-          <tr key={person.name}>
-            <td>{person.name}</td>
-            <td>{person.number}</td>
-          </tr>
+      <ul>
+        {notesToShow.map(note =>
+          <Note key={note.id}
+            note={note}
+          />
         )}
-      </tbody>
-    </table>
+      </ul>
+      <form onSubmit={addNote}>
+        <input
+          value={newNote}
+          onChange={changeNoteHandle}
+        />
+        <button type='submit'>save</button>
+      </form>
+    </div>
   )
 }
 
