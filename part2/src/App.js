@@ -2,121 +2,74 @@ import axios from 'axios'
 import { useState, useEffect } from 'react'
 
 const App = () => {
-  const [persons, setPersons] = useState([])
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
-  const [nameFilter, setnameFilter] = useState('')
+  const [countries, setCountries] = useState([])
+  const [countryName, setCountryName] = useState('swi')
 
-  // loading inital state of persons
+  //Fetching coutries data from 'restouries.com'
   useEffect(() => {
-    console.log('effect running')
     axios
-      .get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
-      })
+      .get('https://restcountries.com/v3.1/all')
+      .then(responce => {
+        setCountries(responce.data)
+    })
   }, [])
 
-  //event handlers
-  const formSubmit = (event) => {
-    event.preventDefault()
-
-    const namesList = persons.reduce((namesList, person) => namesList.concat(person.name), [])
-
-    if (namesList.includes(newName)) {
-      alert(`${newName} is already added to phonebook`)
-      return;
-    }
-
-    const newPerson = {
-      name: newName,
-      number: newNumber,
-    }
-
-    setPersons(persons.concat(newPerson))
-    setNewName('')
-    setNewNumber('')
+  //Event Handlers
+  const countryNameHandler = (event) => {
+    setCountryName(event.target.value)
   }
 
-  const nameInputHandler = (event) => {
-    setNewName(event.target.value)
-  }
-
-  const numberInputHandler = (event) => {
-    setNewNumber(event.target.value)
-  }
-
-  const searchInputHandler = (event) => {
-    setnameFilter(event.target.value)
-  }
-
-  const personsToShow = persons.filter(
-    person => person.name.startsWith(nameFilter))
+  // Variable & other functions
+  const countriesToShow = countries
+    .filter(country => (country.name.common)
+      .toLowerCase().includes(countryName))
 
   return (
     <div>
-      <h2>Phonebook</h2>
-      <Filter searchInputHandler={searchInputHandler} />
+      <p>find countries</p>
+      <input value={countryName}
+        onChange={countryNameHandler} />
 
-      <h3>Add a new</h3>
-      <PersonForm onSubmit={formSubmit}
-        newName={newName}
-        nameInputHandler={nameInputHandler}
-        newNumber={newNumber}
-        numberInputHandler={numberInputHandler}
-      />
-
-      <h3>Numbers</h3>
-      <Persons personsToShow={personsToShow} />
+      <DisplayCountries countries={countriesToShow} />
     </div>
   )
+
 }
 
-const Filter = ({ searchInputHandler }) => {
-  return (
-    <>
-      <span>filter shown with</span>
-      <input onChange={searchInputHandler} />
-    </>
-  )
-}
+const DisplayCountries = ({ countries }) => {
+  if (countries.length > 10) {
+    return (
+      <p>Too many Countries, specify another filter</p>
+    )
+  }
 
-const PersonForm = (props) => {
-  return (
-    <form onSubmit={props.onSubmit}>
-      <div>
-        name:
-        <input required
-          value={props.newName}
-          onChange={props.nameInputHandler} />
+  if (countries.length == 1) {
+    const country = countries[0]
+    console.log(country);
+    return (
+      <div id="country">
+        <h2>{country.name.common}</h2>
+        <p>Capital: {country.capital}</p>
+        <p>Area: {country.area}</p>
+
+        <h3>languages:</h3>
+        <ul>
+          {Object.values(country.languages).map(
+            lang => <li>{lang}</li>
+          )}
+        </ul>
+
+        <img src={country.flags.png} width='150px' />
       </div>
-      <div>
-        number:
-        <input required
-          value={props.newNumber}
-          onChange={props.numberInputHandler} />
+    )
+  }
 
-      </div>
-
-      <div>
-        <button type="submit">add</button>
-      </div>
-    </form>
-  )
-}
-
-const Persons = ({ personsToShow }) => {
   return (
-    <table id="numbers">
-      <tbody>
-        {personsToShow.map(person =>
-          <tr key={person.name}>
-            <td>{person.name}</td>
-            <td>{person.number}</td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+    <ul>
+      {countries.map(country =>
+        <li key={country.id}>{country.name.common}</li>
+      )}
+    </ul>
   )
 }
 
