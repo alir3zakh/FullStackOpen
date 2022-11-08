@@ -11,7 +11,7 @@ const App = () => {
       .get('https://restcountries.com/v3.1/all')
       .then(responce => {
         setCountries(responce.data)
-    })
+      })
   }, [])
 
   //Event Handlers
@@ -22,21 +22,25 @@ const App = () => {
   // Variable & other functions
   const countriesToShow = countries
     .filter(country => (country.name.common)
-      .toLowerCase().includes(countryName))
+      .toLowerCase()
+      .includes(countryName.toLowerCase()))
 
   return (
     <div>
-      <p>find countries</p>
+      <h1>Find Countries</h1>
       <input value={countryName}
         onChange={countryNameHandler} />
 
-      <DisplayCountries countries={countriesToShow} />
+      <DisplayCountries
+        countries={countriesToShow}
+        setCountry={setCountryName}
+      />
     </div>
   )
 
 }
 
-const DisplayCountries = ({ countries }) => {
+const DisplayCountries = ({ countries, setCountry }) => {
   if (countries.length > 10) {
     return (
       <p>Too many Countries, specify another filter</p>
@@ -45,7 +49,7 @@ const DisplayCountries = ({ countries }) => {
 
   if (countries.length == 1) {
     const country = countries[0]
-    console.log(country);
+
     return (
       <div id="country">
         <h2>{country.name.common}</h2>
@@ -65,11 +69,22 @@ const DisplayCountries = ({ countries }) => {
   }
 
   return (
-    <ul>
-      {countries.map(country =>
-        <li key={country.id}>{country.name.common}</li>
-      )}
-    </ul>
+    <table>
+      <tbody>
+        {countries.map(country =>
+          <tr>
+            <td key={country.id}>
+              {country.name.common}
+            </td>
+            <td>
+              <button onClick={() => setCountry(country.name.common)}>
+                show
+              </button>
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
   )
 }
 
