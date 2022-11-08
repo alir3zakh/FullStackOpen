@@ -3,7 +3,10 @@ import { useState, useEffect } from 'react'
 
 const App = () => {
   const [countries, setCountries] = useState([])
-  const [countryName, setCountryName] = useState('swi')
+  const [countryName, setCountryName] = useState('iran')
+
+  const openWeatherAPIURL = `https://api.openweathermap.org/data/2.5/weather?q=dallas
+&appid=c4e857e2e633494bbff6f8f0cf39bdb4`
 
   //Fetching coutries data from 'restouries.com'
   useEffect(() => {
@@ -64,6 +67,9 @@ const DisplayCountries = ({ countries, setCountry }) => {
         </ul>
 
         <img src={country.flags.png} width='150px' />
+
+        <h3>{country.capital}'s Weather</h3>
+        <Weather city={country.capital} />
       </div>
     )
   }
@@ -85,6 +91,31 @@ const DisplayCountries = ({ countries, setCountry }) => {
         )}
       </tbody>
     </table>
+  )
+}
+
+const Weather = ({ city }) => {
+  const [weather, setWeather] = useState({})
+  const openWeatherAPIURL = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric
+&appid=c4e857e2e633494bbff6f8f0cf39bdb4`
+
+
+  useEffect(() => {
+    axios.get(openWeatherAPIURL)
+      .then(response => {
+        setWeather(response.data)
+      })
+  }, [])
+
+  // debugger;
+  let weatherIconURL;
+
+  return (
+    <div id="weather-info">
+      <p>Temperature {weather?.main?.temp} Celcius</p>
+      {/* <img src={weather?.weather?.icon} alt=":("/> */}
+      <p>Wind {weather?.wind?.speed} m/s</p>
+    </div>
   )
 }
 
