@@ -7,6 +7,7 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [nameFilter, setnameFilter] = useState('')
   const [notifMessage, setNotifMessage] = useState(null)
+  const [notifType, setNotifType] = useState('')
 
   // Loading initial phonebook
   useEffect(() => {
@@ -22,23 +23,26 @@ const App = () => {
     event.preventDefault()
     const personExists = persons.find(p => p.name === newName)
 
-    if (personExists) {
-      if (window.confirm(`${newName} is already added to phonebook, replace the old number with the new one?`)) {
-        personServices.updatePerson(personExists.id,
-            { ...personExists, number: newNumber })
-          .then(response => {
-            console.log(response)
-            setPersons(persons.map(p => p.name !== newName ?
-              p : response))
-            setNewName('')
-            setNewNumber('')
-            setNotifMessage(`${newName}'s number updated`)
-            setInterval(() => {
-              setNotifMessage(null)
-            }, 5000);
-          })
-      }
+    if (personExists && window.confirm(`${newName} is already added to phonebook, replace the old number with the new one?`)) {
+      personServices
+        .updatePerson(personExists.id,
+        { ...personExists, number: newNumber })
+        .then(response => {
+          setPersons(persons.map(p => p.name !== newName ? p : response))
+          setNewName('')
+          setNewNumber('')
+          setNotifMessage(`${newName}'s number updated`)
+          setNotifType('success')
+          setInterval(() => setNotifMessage(null), 5000);
+        })
+        .catch(() => {
+          setNotifMessage(`${newName} has already been deleted from server`)
+          setNotifType('error')
+          setInterval(() => setNotifMessage(null), 5000);
+          setPersons(persons.filter(p => p.id !== personExists.id))
+      })
     }
+
     else {
       const newPerson = {
         name: newName,
@@ -51,9 +55,8 @@ const App = () => {
           setNewName('')
           setNewNumber('')
           setNotifMessage(`${newName} added`)
-          setInterval(() => {
-            setNotifMessage(null)
-          }, 5000);
+          setNotifType('success')
+          setInterval(() => setNotifMessage(null), 5000);
         })
     }
   }
@@ -62,12 +65,17 @@ const App = () => {
     const person = persons.find(p => p.id === id)
     if (window.confirm(`delete ${person.name}?`)) {
       personServices.deletePerson(id)
-        .then( () => {
+        .then(() => {
           setPersons(persons.filter(p => p.id !== id))
           setNotifMessage(`${person.name} deleted`)
-          setInterval(() => {
-            setNotifMessage(null)
-          }, 5000);
+          setNotifType('success')
+          setInterval(() => setNotifMessage(null), 5000);
+        })
+        .catch(() => {
+          setNotifMessage(`${person.name} has already been deleted from server`)
+          setNotifType('error')
+          setInterval(() => setNotifMessage(null), 5000);
+          setPersons(persons.filter(p => p.id !== id))
         })
     }
   }
@@ -92,7 +100,10 @@ const App = () => {
   return (
     <div>
       <h1>Phonebook</h1>
-      <Notification message={notifMessage} type='error'/>
+      <Notification
+        message={notifMessage}
+        type={notifType}
+      />
       <Filter searchInputHandler={searchInputHandler} />
 
       <h3>Add a new</h3>
@@ -165,10 +176,10 @@ const Persons = ({ personsToShow, deleteHandler }) => {
   )
 }
 
-const Notification = ({ message }) => {
+const Notification = ({ message, type }) => {
   if (message === null) return null
   return (
-    <div className={'notification'}>
+    <div className={'notification ' + type}>
       {message}
     </div>
   )
