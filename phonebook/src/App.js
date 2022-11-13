@@ -19,27 +19,34 @@ const App = () => {
   //event handlers
   const formSubmit = (event) => {
     event.preventDefault()
+    const personExists = persons.find(p => p.name === newName)
 
-
-    const namesList = persons.reduce(
-      (namesList, person) => namesList.concat(person.name), [])
-
-    if (namesList.includes(newName)) {
-      alert(`${newName} is already added to phonebook`)
-      return;
+    if (personExists) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with the new one?`)) {
+        personServices.updatePerson(personExists.id,
+            { ...personExists, number: newNumber })
+          .then(response => {
+            console.log(response)
+            setPersons(persons.map(p => p.name !== newName ?
+              p : response))
+            setNewName('')
+            setNewNumber('')
+        })
+      }
     }
+    else {
+      const newPerson = {
+        name: newName,
+        number: newNumber,
+      }
 
-    const newPerson = {
-      name: newName,
-      number: newNumber,
+      personServices.addNew(newPerson)
+        .then(response => {
+          setPersons(persons.concat(response))
+          setNewName('')
+          setNewNumber('')
+        })
     }
-
-    personServices.addNew(newPerson)
-      .then(response => {
-        setPersons(persons.concat(response))
-        setNewName('')
-        setNewNumber('')
-      })
   }
 
   const nameInputHandler = (event) => {
