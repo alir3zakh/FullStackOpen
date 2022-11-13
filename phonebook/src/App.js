@@ -6,6 +6,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [nameFilter, setnameFilter] = useState('')
+  const [notifMessage, setNotifMessage] = useState(null)
 
   // Loading initial phonebook
   useEffect(() => {
@@ -31,7 +32,11 @@ const App = () => {
               p : response))
             setNewName('')
             setNewNumber('')
-        })
+            setNotifMessage(`${newName}'s number updated`)
+            setInterval(() => {
+              setNotifMessage(null)
+            }, 5000);
+          })
       }
     }
     else {
@@ -45,6 +50,24 @@ const App = () => {
           setPersons(persons.concat(response))
           setNewName('')
           setNewNumber('')
+          setNotifMessage(`${newName} added`)
+          setInterval(() => {
+            setNotifMessage(null)
+          }, 5000);
+        })
+    }
+  }
+
+  const deletePersonHandler = (id) => {
+    const person = persons.find(p => p.id === id)
+    if (window.confirm(`delete ${person.name}?`)) {
+      personServices.deletePerson(id)
+        .then( () => {
+          setPersons(persons.filter(p => p.id !== id))
+          setNotifMessage(`${person.name} deleted`)
+          setInterval(() => {
+            setNotifMessage(null)
+          }, 5000);
         })
     }
   }
@@ -61,16 +84,6 @@ const App = () => {
     setnameFilter(event.target.value)
   }
 
-  const deletePersonHandler = (id) => {
-    const person = persons.find(p => p.id === id)
-    if (window.confirm(`delete ${person.name}?`)) {
-      personServices.deletePerson(id)
-        .then(response => {
-          setPersons(persons.filter(p => p.id !== id))
-        })
-    }
-  }
-
   // Other Functions
   const personsToShow = persons.filter(
     person => person.name.startsWith(nameFilter)
@@ -78,7 +91,8 @@ const App = () => {
 
   return (
     <div>
-      <h2>Phonebook</h2>
+      <h1>Phonebook</h1>
+      <Notification message={notifMessage} type='error'/>
       <Filter searchInputHandler={searchInputHandler} />
 
       <h3>Add a new</h3>
@@ -148,6 +162,15 @@ const Persons = ({ personsToShow, deleteHandler }) => {
         )}
       </tbody>
     </table>
+  )
+}
+
+const Notification = ({ message }) => {
+  if (message === null) return null
+  return (
+    <div className={'notification'}>
+      {message}
+    </div>
   )
 }
 
