@@ -1,21 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ])
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [nameFilter, setnameFilter] = useState('')
+
+  // Loading initial phonebook
+  useEffect(() => {
+    axios.get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+  }, [])
+
 
   //event handlers
   const formSubmit = (event) => {
     event.preventDefault()
 
-    const namesList = persons.reduce((namesList, person) => namesList.concat(person.name), [])
+
+    const namesList = persons.reduce(
+      (namesList, person) => namesList.concat(person.name), [])
 
     if (namesList.includes(newName)) {
       alert(`${newName} is already added to phonebook`)
@@ -27,9 +34,13 @@ const App = () => {
       number: newNumber,
     }
 
-    setPersons(persons.concat(newPerson))
-    setNewName('')
-    setNewNumber('')
+    axios
+      .post('http://localhost:3001/persons', newPerson)
+      .then(response => {
+            setPersons(persons.concat(response.data))
+            setNewName('')
+            setNewNumber('')
+    })
   }
 
   const nameInputHandler = (event) => {
@@ -44,6 +55,7 @@ const App = () => {
     setnameFilter(event.target.value)
   }
 
+  // Other Functions
   const personsToShow = persons.filter(
     person => person.name.startsWith(nameFilter)
   )
@@ -105,7 +117,7 @@ const Persons = ({ personsToShow }) => {
     <table id="numbers">
       <tbody>
         {personsToShow.map(person =>
-          <tr key={person.name}>
+          <tr key={person.id}>
             <td>{person.name}</td>
             <td>{person.number}</td>
           </tr>
