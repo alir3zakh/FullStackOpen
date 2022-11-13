@@ -1,50 +1,96 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+
+import Note from './components/Note'
+import noteService from './services/note'
 
 const App = () => {
-  const anecdotes = [
-    'If it hurts, do it more often.',
-    'Adding manpower to a late software project makes it later!',
-    'The first 90 percent of the code accounts for the first 10 percent of the development time...The remaining 10 percent of the code accounts for the other 90 percent of the development time.',
-    'Any fool can write code that a computer can understand. Good programmers write code that humans can understand.',
-    'Premature optimization is the root of all evil.',
-    'Debugging is twice as hard as writing the code in the first place. Therefore, if you write the code as cleverly as possible, you are, by definition, not smart enough to debug it.',
-    'Programming without an extremely heavy use of console.log is same as if a doctor would refuse to use x-rays or blood tests when diagnosing patients.'
-  ]
-
   //component states
-  const [selected, setSelected] = useState(0)
-  const [votes, setVote] = useState(new Array(anecdotes.length).fill(0))
+  const [notes, setNotes] = useState([])
+  const [newNote, setNewNote] = useState('initial note state')
+  const [showAll, setShowAll] = useState(true)
 
-  // handler fucntions
-  const anecdoteHandler = () => {
-    const randIndex = Math.floor(Math.random() * anecdotes.length)
-    setSelected(randIndex);
+  useEffect(() => {
+    const dummyNote = {
+      content: 'Dummy',
+      date: new Date().toISOString(),
+      important: Math.random() < 0.5,
+      id: 10
+    }
+
+    noteService.getAll()
+      .then(initialNotes =>
+        setNotes(initialNotes.concat(dummyNote))
+      )
+  }, [])
+  console.log('render', notes.length, 'notes')
+
+  // event handlers
+  const addNote = (event) => {
+    event.preventDefault();
+
+    const noteObject = {
+      content: newNote,
+      date: new Date().toISOString(),
+      important: Math.random() < 0.5,
+    }
+
+    noteService.create(noteObject)
+      .then(newNote => {
+        setNotes(notes.concat(newNote))
+        setNewNote('')
+      })
+
   }
 
-  const voteHandler = () => {
-    let newVotes = [...votes]
-    newVotes[selected] += 1
-    setVote(newVotes)
+  const toggleImportanceOf = (id) => {
+    const note = notes.find(n => n.id === id)
+    const changedNote = { ...note, important: !note.important }
+
+    noteService.update(changedNote, id)
+      .then(updatedNote => {
+        setNotes(notes.map(n => n.id === id ? updatedNote : n))
+      })
+      .catch(error => {
+        alert(`the note ${note.content} has been already deleted from server`)
+        setNotes(notes.filter(n => n.id !== id))
+      })
   }
 
-  const maxIndex = votes.indexOf(Math.max(...votes));
+  const changeNoteHandle = (event) => {
+    setNewNote(event.target.value)
+  }
+
+  // other vars / functions
+  const notesToShow = (showAll ?
+    notes :
+    notes.filter(note => note.important))
 
   return (
     <div>
-      <h2>Anecdote of the day</h2>
-      <p>{anecdotes[selected]}</p>
-      <p>has {votes[selected]} votes</p>
-      <Button text="vote" handlerFunc={voteHandler} />
-      <Button text="next anecdote" handlerFunc={anecdoteHandler} />
+      <h1>Notes</h1>
+      <div>
+        <button onClick={() => setShowAll(!showAll)}>
+          show {showAll ? 'important' : 'all'}
+        </button>
+      </div>
 
-      <h2>Anecdote with most votes</h2>
-      <p>{anecdotes[maxIndex]}</p>
+      <ul>
+        {notesToShow.map(note =>
+          <Note key={note.id}
+            note={note}
+            toggleImportance={() => toggleImportanceOf(note.id)}
+          />
+        )}
+      </ul>
+      <form onSubmit={addNote}>
+        <input
+          value={newNote}
+          onChange={changeNoteHandle}
+        />
+        <button type='submit'>save</button>
+      </form>
     </div>
   )
-}
-
-const Button = ({ handlerFunc, text }) => {
-  return <button onClick={handlerFunc}>{text}</button>
 }
 
 export default App
