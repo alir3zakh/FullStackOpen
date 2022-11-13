@@ -36,10 +36,10 @@ const App = () => {
 
     personServices.addNew(newPerson)
       .then(response => {
-            setPersons(persons.concat(response))
-            setNewName('')
-            setNewNumber('')
-    })
+        setPersons(persons.concat(response))
+        setNewName('')
+        setNewNumber('')
+      })
   }
 
   const nameInputHandler = (event) => {
@@ -52,6 +52,16 @@ const App = () => {
 
   const searchInputHandler = (event) => {
     setnameFilter(event.target.value)
+  }
+
+  const deletePersonHandler = (id) => {
+    const person = persons.find(p => p.id === id)
+    if (window.confirm(`delete ${person.name}?`)) {
+      personServices.deletePerson(id)
+        .then(response => {
+          setPersons(persons.filter(p => p.id !== id))
+        })
+    }
   }
 
   // Other Functions
@@ -73,7 +83,10 @@ const App = () => {
       />
 
       <h3>Numbers</h3>
-      <Persons personsToShow={personsToShow} />
+      <Persons
+        personsToShow={personsToShow}
+        deleteHandler={deletePersonHandler}
+      />
     </div>
   )
 }
@@ -111,7 +124,7 @@ const PersonForm = (props) => {
   )
 }
 
-const Persons = ({ personsToShow }) => {
+const Persons = ({ personsToShow, deleteHandler }) => {
   return (
     <table id="numbers">
       <tbody>
@@ -119,6 +132,11 @@ const Persons = ({ personsToShow }) => {
           <tr key={person.id}>
             <td>{person.name}</td>
             <td>{person.number}</td>
+            <td>
+              <button onClick={() => deleteHandler(person.id)}>
+                delete
+              </button>
+            </td>
           </tr>
         )}
       </tbody>
