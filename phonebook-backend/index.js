@@ -41,6 +41,18 @@ app.get('/info', (req, res) => {
     res.send(info + date)
 })
 
+
 app.get(baseURL, (req, res) => {
     res.json(persons)
+})
+
+app.get(baseURL + '/:id', (req, res) => {
+    const id = Number(req.params.id)
+    const person = persons.find(p => p.id === id)
+
+    if (person) {
+        res.json(person)
+    } else {
+        res.status(404).end()
+    }
 })
