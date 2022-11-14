@@ -1,7 +1,7 @@
-const { response } = require('express')
 const express = require('express')
 const app = express()
 
+app.use(express.json())
 
 let persons = [
     {
@@ -28,6 +28,10 @@ let persons = [
 
 const baseURL = '/api/persons'
 const PORT = 3001
+
+const generateID = () => {
+    return Math.floor(Math.random() * 1e6)
+}
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
@@ -62,4 +66,35 @@ app.delete(baseURL + '/:id', (req, res) => {
 
     persons = persons.filter(p => p.id !== id)
     res.status(204).end()
+})
+
+app.post(baseURL, (req, res) => {
+    const body = req.body
+    const personExists = persons.find(p => p.name === body.name)
+
+    if (!body.name) {
+        return res.status(400).json({
+            error: 'name property must be present'
+        })
+    }
+
+    if (!body.number) {
+        return res.status(400).json({
+            error: 'number property must be present'
+        })
+    }
+
+    if (personExists) {
+        return res.status(400).json({
+            error: 'name property must be unique'
+        })
+    }
+
+    const newPerson = {
+        name: body.name,
+        number: body.number,
+        id: generateID()
+    }
+    persons.concat(newPerson)
+    res.json(newPerson)
 })
