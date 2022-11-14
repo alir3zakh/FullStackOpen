@@ -1,3 +1,4 @@
+const { response } = require('express')
 const express = require('express')
 const app = express()
 
@@ -30,6 +31,14 @@ const PORT = 3001
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
+})
+
+app.get('/info', (req, res) => {
+    const info = `<p>Phonebook has info for ${persons.length} people</p>`
+    const date = `<p>${new Date()}</p>`
+
+    console.log(info + date);
+    res.send(info + date)
 })
 
 app.get(baseURL, (req, res) => {
