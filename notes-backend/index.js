@@ -3,10 +3,12 @@ const cors = require('cors')
 
 const app = express()
 
+// 
+app.use(express.static('build'))
+
 // allow for requests from all origins
 app.use(cors())
 
-//
 app.use(express.json())
 
 let notes = [
