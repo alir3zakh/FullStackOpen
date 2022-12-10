@@ -146,7 +146,6 @@ const PersonForm = (props) => {
         <input required
           value={props.newNumber}
           onChange={props.numberInputHandler} />
-
       </div>
 
       <div>
