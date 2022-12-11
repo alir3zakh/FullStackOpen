@@ -1,14 +1,15 @@
+require('dotenv').config()
 const express = require('express')
-const cors = require('cors')
-
 const app = express()
 
-// 
-app.use(express.static('build'))
+const cors = require('cors')
+const Note = require('./models/note')
 
+
+// middlewares
+app.use(express.static('build'))
 // allow for requests from all origins
 app.use(cors())
-
 app.use(express.json())
 
 let notes = [
@@ -44,7 +45,9 @@ app.get('/', (request, response) => {
 })
 
 app.get('/api/notes', (request, response) => {
-    response.json(notes)
+    Note.find({}).then(notes => {
+        response.json(notes)
+    })
 })
 
 app.get('/api/notes/:id', (request, response) => {
@@ -85,7 +88,7 @@ app.post('/api/notes', (request, response) => {
     console.log(notes)
 })
 
-const PORT = process.env.PORT || 8080
+const PORT = process.env.PORT
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
