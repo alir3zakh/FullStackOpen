@@ -32,7 +32,6 @@ const App = () => {
 
     const noteObject = {
       content: newNote,
-      date: new Date().toISOString(),
       important: Math.random() < 0.5,
     }
 
@@ -53,6 +52,7 @@ const App = () => {
         setNotes(notes.map(n => n.id === id ? updatedNote : n))
       })
       .catch(error => {
+        console.log(error)
         setErrorMessage(
           `Note '${note.content}' was already removed from server`
         )
