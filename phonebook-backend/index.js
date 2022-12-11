@@ -1,8 +1,11 @@
-const express = require('express')
-const morgan = require('morgan')
-const cors = require('cors')
+require('dotenv').config()
 
+const express = require('express')
 const app = express()
+
+// const morgan = require('morgan')
+const cors = require('cors')
+const Person = require('./models/person')
 
 app.use(express.static('build'))
 
@@ -22,40 +25,14 @@ app.use(express.json())
 //     ].join(' ')
 // }))
 
-let persons = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": 2,
-        "name": "Ada Lovelace",
-        "number": "39-44-5323523"
-    },
-    {
-        "id": 3,
-        "name": "Dan Abramov",
-        "number": "12-43-234345"
-    },
-    {
-        "id": 4,
-        "name": "Mary Poppendieck",
-        "number": "39-23-6423122"
-    }
-]
-
 const baseURL = '/api/persons'
-const PORT = 8080
 
-const generateID = () => {
-    return Math.floor(Math.random() * 1e6)
-}
-
+const PORT = process.env.PORT
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`)
 })
 
+// needs new route handler
 app.get('/info', (req, res) => {
     const info = `<p>Phonebook has info for ${persons.length} people</p>`
     const date = `<p>${new Date()}</p>`
@@ -64,21 +41,18 @@ app.get('/info', (req, res) => {
 })
 
 
-app.get(baseURL, (req, res) => {
-    res.json(persons)
+app.get(baseURL, (request, response) => {
+    Person.find({}).then(result => {
+        response.json(result)
+    })
 })
 
-app.get(baseURL + '/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const person = persons.find(p => p.id === id)
-
-    if (person) {
-        res.json(person)
-    } else {
-        res.status(404).end()
-    }
+app.get(baseURL + '/:id', (request, response) => {
+    Person.findById(request.params.id).
+        then(person => response.json(person))
 })
 
+// needs new route handler
 app.delete(baseURL + '/:id', (req, res) => {
     const id = Number(req.params.id)
 
@@ -86,33 +60,34 @@ app.delete(baseURL + '/:id', (req, res) => {
     res.status(204).end()
 })
 
-app.post(baseURL, (req, res) => {
-    const body = req.body
-    const personExists = persons.find(p => p.name === body.name)
+app.post(baseURL, (request, response) => {
+    const body = request.body
+    // const personExists = persons.find(p => p.name === body.name)
 
     if (!body.name) {
-        return res.status(400).json({
+        return response.status(400).json({
             error: 'name property must be present'
         })
     }
 
     if (!body.number) {
-        return res.status(400).json({
+        return response.status(400).json({
             error: 'number property must be present'
         })
     }
 
-    if (personExists) {
-        return res.status(400).json({
-            error: 'name property must be unique'
-        })
-    }
+    // if (personExists) {
+    //     return res.status(400).json({
+    //         error: 'name property must be unique'
+    //     })
+    // }
 
-    const newPerson = {
+    const newPerson = new Person({
         name: body.name,
         number: body.number,
-        id: generateID()
-    }
-    persons.concat(newPerson)
-    res.json(newPerson)
+    })
+
+    newPerson.save().then(saved_person => {
+        response.json(saved_person)
+    })
 })
