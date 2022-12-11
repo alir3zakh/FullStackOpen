@@ -6,6 +6,17 @@ const app = express()
 const cors = require('cors')
 const Note = require('./models/note')
 
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+
+    if (error.name === 'CastError') {
+        return response.status(400).send({ error: 'malformatted id' })
+    }
+
+    // pass the error to default Express error handler
+    next(error)
+}
+
 
 // middlewares
 app.use(express.static('build'))
@@ -13,6 +24,8 @@ app.use(express.static('build'))
 app.use(cors())
 app.use(express.json())
 
+// important: has to be last middleware
+app.use(errorHandler)
 
 
 app.get('/', (request, response) => {
@@ -25,9 +38,19 @@ app.get('/api/notes', (request, response) => {
     })
 })
 
-app.get('/api/notes/:id', (request, response) => {
-    Note.findById(request.body.id).
-        then(note => response.json(note))
+app.get('/api/notes/:id', (request, response, next) => {
+    Note.findById(request.body.id)
+        .then(note => {
+            if (note) {
+                response.json(note)
+            } else {
+                response.status(404).end()
+            }
+        })
+        .catch(error => {
+            console.log(error)
+            next(error)
+    })
 })
 
 app.delete('/api/notes/:id', (request, response) => {
