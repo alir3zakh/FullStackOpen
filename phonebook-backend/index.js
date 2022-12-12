@@ -32,12 +32,13 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
 
-// needs new route handler
-app.get('/info', (req, res) => {
-    const info = `<p>Phonebook has info for ${persons.length} people</p>`
-    const date = `<p>${new Date()}</p>`
 
-    res.send(info + date)
+app.get('/info', (req, res) => {
+    Person.countDocuments({}, (err, docCount) => {
+        const info = `<p>Phonebook has info for ${docCount} people</p>`
+        const date = `<p>${new Date()}</p>`
+        res.send(info + date)
+    })
 })
 
 
@@ -47,14 +48,14 @@ app.get(baseURL, (req, res, next) => {
         .catch(err => next(err))
 })
 
-app.get(baseURL + ':id', (req, res, next) => {
+app.get(`${baseURL}:id`, (req, res, next) => {
     Person.findById(req.params.id)
         .then(person => res.json(person))
         .catch(err => next(err))
 })
 
-// needs new route handler
-app.delete(baseURL + ':id', (req, res, next) => {
+
+app.delete(`${baseURL}:id`, (req, res, next) => {
     Person.findByIdAndRemove(req.params.id)
         .then(result => res.status(204).end())
         .catch(err => next(err))
