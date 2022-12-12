@@ -14,55 +14,47 @@ app.use(cors())
 app.use(express.json())
 
 const baseURL = '/api/notes/'
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 8080
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
 
-app.get('/', (request, response) => {
-    response.send('<h1>Hello World!</h1>')
+app.get('/', (req, res) => {
+    res.send('<h1>Hello World!</h1>')
 })
 
-app.get(baseURL, (request, response) => {
+app.get(baseURL, (req, res) => {
     Note.find({}).then(notes => {
-        response.json(notes)
+        res.json(notes)
     })
 })
 
-app.get(`${baseURL}:id`, (request, response, next) => {
-    Note.findById(request.params.id)
+app.get(`${baseURL}:id`, (req, res, next) => {
+    Note.findById(req.params.id)
         .then(note => {
             if (note) {
-                response.json(note)
+                res.json(note)
             } else {
-                response.status(404).end()
+                res.status(404).end()
             }
         })
         .catch(error => {
             console.log(error)
             next(error)
-    })
+        })
 })
 
-app.delete(`${baseURL}:id`, (request, response, next) => {
-    Note.findByIdAndRemove(request.params.id)
+app.delete(`${baseURL}:id`, (req, res, next) => {
+    Note.findByIdAndRemove(req.params.id)
         .then(result => {
             // 204: no content
-        response.status(204).end()
+            res.status(204).end()
         })
         .catch(error => naxt(error))
-
-    response.status(204).end()
 })
 
-app.post(baseURL, (request, response, next) => {
-    const body = request.body
-
-    if (!body.content) {
-        return response.status(400).json({
-            error: 'content missing'
-        })
-    }
+app.post(baseURL, (req, res, next) => {
+    const body = req.body
 
     const note = new Note({
         content: body.content,
@@ -70,45 +62,40 @@ app.post(baseURL, (request, response, next) => {
         important: body.important || false
     })
 
-    note.save().then(saved_note => {
-        response.json(saved_note)
-    })
+    note.save()
+        .then(saved_note => res.json(saved_note))
+        .catch(err => next(err))
 })
 
-app.put(`${baseURL}:id`, (request, response, next) => {
-    const body = request.body
+app.put(`${baseURL}:id`, (req, res, next) => {
+    const { content, important } = req.body
 
-    const note = {
-        content: body.content,
-        important: body.important
-    }
-
-    Note.findByIdAndUpdate(request.params.id, note, { new: true })
-        .then(updated_note => {
-        response.json(updated_note)
-        })
+    Note.findByIdAndUpdate(
+        req.params.id,
+        { content, important },
+        { new: true, runValidators: true, context: 'query' })
+        .then(updated_note => res.json(updated_note))
         .catch(error => next(error))
 })
 
-// important: has to be next to the last middleware
-const unknownEndpoint = (request, response) => {
-    response.status(404).send({ error: 'unknown endpoint' })
-}
+// req handler for unknown endpoint
+// ** HAS TO BE NEXT TO LAST
+app.use((req, res) => {
+    res.status(404).send({ error: 'unknown endpoint' })
+})
 
-// handler of requests with unknown endpoint
-app.use(unknownEndpoint)
 
-// error handlers
-const errorHandler = (error, request, response, next) => {
-    console.error(error.message)
+// error handler
+// ** HAS TO BE LAST
+app.use((err, req, res, next) => {
+    console.log(err.message)
 
-    if (error.name === 'CastError') {
-        return response.status(400).send({ error: 'malformatted id' })
+    if (err.name === 'CastError') {
+        return res.status(400)
+            .send({ error: 'malformatted id' })
+    } else if (err.name === 'ValidationError') {
+        return res.status(400).json({ error: err.message })
     }
-
     // pass the error to default Express error handler
-    next(error)
-}
-
-// important: has to be last middleware
-app.use(errorHandler)
+    next(err)
+})
