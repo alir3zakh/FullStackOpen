@@ -41,15 +41,16 @@ app.get('/info', (req, res) => {
 })
 
 
-app.get(baseURL, (req, res) => {
-    Person.find({}).then(result => {
-        res.json(result)
-    })
+app.get(baseURL, (req, res, next) => {
+    Person.find({})
+        .then(result => res.json(result))
+        .catch(err => next(err))
 })
 
-app.get(baseURL + ':id', (req, res) => {
-    Person.findById(req.params.id).
-        then(person => res.json(person))
+app.get(baseURL + ':id', (req, res, next) => {
+    Person.findById(req.params.id)
+        .then(person => res.json(person))
+        .catch(err => next(err))
 })
 
 // needs new route handler
@@ -59,7 +60,7 @@ app.delete(baseURL + ':id', (req, res, next) => {
         .catch(err => next(err))
 })
 
-app.post(baseURL, (req, res) => {
+app.post(baseURL, (req, res, next) => {
     const body = req.body
     // const personExists = persons.find(p => p.name === body.name)
 
@@ -88,12 +89,21 @@ app.post(baseURL, (req, res) => {
 
     newPerson.save().then(saved_person => {
         res.json(saved_person)
-    })
+    }).catch(err => next(err))
 })
 
 
-const unknownEndpoint = (req, res) => {
-    res.status(404).send({ error: 'unknown endpoint'})
-}
+// request handler for unknown endpoint
+// ** HAS TO BE NEXT TO LAST
+app.use((req, res) => {
+    res.status(404).send({ error: 'unknown endpoint' })
+})
 
-app.use(unknownEndpoint)
+// error handler
+// ** HAS TO BE LAST
+app.use((err, req, res, next) => {
+    console.log(err.message)
+
+    // pass the error to default Express error handler
+    next(err)
+})
