@@ -93,6 +93,15 @@ app.post(baseURL, (req, res, next) => {
 })
 
 
+app.put(`${baseURL}:id`, (req, res, next) => {
+    console.log(req.params.id)
+    Person.findByIdAndUpdate(
+        req.params.id, req.body, { new: true })
+        .then(updatedPerson => res.json(updatedPerson))
+        .catch(err => next(err))
+})
+
+
 // request handler for unknown endpoint
 // ** HAS TO BE NEXT TO LAST
 app.use((req, res) => {
