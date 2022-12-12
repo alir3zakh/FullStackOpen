@@ -26,7 +26,7 @@ app.use(express.json())
 // }))
 
 const baseURL = '/api/persons/'
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 8080
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
@@ -48,6 +48,7 @@ app.get(baseURL, (req, res, next) => {
         .catch(err => next(err))
 })
 
+
 app.get(`${baseURL}:id`, (req, res, next) => {
     Person.findById(req.params.id)
         .then(person => res.json(person))
@@ -61,43 +62,28 @@ app.delete(`${baseURL}:id`, (req, res, next) => {
         .catch(err => next(err))
 })
 
+
 app.post(baseURL, (req, res, next) => {
     const body = req.body
-    // const personExists = persons.find(p => p.name === body.name)
-
-    if (!body.name) {
-        return res.status(400).json({
-            error: 'name property must be present'
-        })
-    }
-
-    if (!body.number) {
-        return res.status(400).json({
-            error: 'number property must be present'
-        })
-    }
-
-    // if (personExists) {
-    //     return res.status(400).json({
-    //         error: 'name property must be unique'
-    //     })
-    // }
 
     const newPerson = new Person({
         name: body.name,
         number: body.number,
     })
 
-    newPerson.save().then(saved_person => {
-        res.json(saved_person)
-    }).catch(err => next(err))
+    newPerson.save()
+        .then(saved_person => res.json(saved_person))
+        .catch(err => next(err))
 })
 
 
 app.put(`${baseURL}:id`, (req, res, next) => {
-    console.log(req.params.id)
+    const { name, number } = req.body
+
     Person.findByIdAndUpdate(
-        req.params.id, req.body, { new: true })
+        req.params.id,
+        { name, number },
+        { new: true, runValidators: true, context: 'query' })
         .then(updatedPerson => res.json(updatedPerson))
         .catch(err => next(err))
 })
@@ -114,6 +100,11 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
     console.log(err.message)
 
+    if (err.name === 'CastError') {
+        return res.status(400).send({ error: 'malformatted id' })
+    } else if (err.name === 'ValidationError') {
+        return res.status(400).json({ error: err.message })
+    }
     // pass the error to default Express error handler
     next(err)
 })

@@ -23,24 +23,26 @@ const App = () => {
     event.preventDefault()
     const personExists = persons.find(p => p.name === newName)
 
-    if (personExists && window.confirm(`${newName} is already added to phonebook, replace the old number with the new one?`)) {
-      personServices
-        .updatePerson(personExists.id,
-        { ...personExists, number: newNumber })
-        .then(response => {
-          setPersons(persons.map(p => p.name !== newName ? p : response))
-          setNewName('')
-          setNewNumber('')
-          setNotifMessage(`${newName}'s number updated`)
-          setNotifType('success')
-          setInterval(() => setNotifMessage(null), 5000);
-        })
-        .catch(() => {
-          setNotifMessage(`${newName} has already been deleted from server`)
-          setNotifType('error')
-          setInterval(() => setNotifMessage(null), 5000);
-          setPersons(persons.filter(p => p.id !== personExists.id))
-      })
+    if (personExists) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with the new one?`)) {
+        personServices
+          .updatePerson(personExists.id,
+            { ...personExists, number: newNumber })
+          .then(response => {
+            setPersons(persons.map(p => p.name !== newName ? p : response))
+            setNewName('')
+            setNewNumber('')
+            setNotifMessage(`${newName}'s number updated`)
+            setNotifType('success')
+            setInterval(() => setNotifMessage(null), 5000);
+          })
+          .catch((error) => {
+            setNotifMessage(error.response.data.error)
+            setNotifType('error')
+            setInterval(() => setNotifMessage(null), 5000);
+            setPersons(persons.filter(p => p.id !== personExists.id))
+          })
+      }
     }
 
     else {
@@ -57,6 +59,11 @@ const App = () => {
           setNotifMessage(`${newName} added`)
           setNotifType('success')
           setInterval(() => setNotifMessage(null), 5000);
+        })
+        .catch(error => {
+          setNotifMessage(error.response.data.error)
+          setNotifType('error')
+          setInterval(() => setNotifMessage(null), 5000)
         })
     }
   }
