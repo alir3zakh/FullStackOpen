@@ -19,15 +19,15 @@ app.use(express.json())
 //         tokens.url(req, res),
 //         tokens.status(req, res),
 //         tokens.res(req, res, 'content-length'), '-',
-//         tokens['response-time'](req, res), 'ms',
+//         tokens['res-time'](req, res), 'ms',
 //         tokens.method(req, res) === 'POST'
 //             ? JSON.stringify(req.body) : '',
 //     ].join(' ')
 // }))
 
-const baseURL = '/api/persons'
-
+const baseURL = '/api/persons/'
 const PORT = process.env.PORT
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
@@ -41,37 +41,36 @@ app.get('/info', (req, res) => {
 })
 
 
-app.get(baseURL, (request, response) => {
+app.get(baseURL, (req, res) => {
     Person.find({}).then(result => {
-        response.json(result)
+        res.json(result)
     })
 })
 
-app.get(baseURL + '/:id', (request, response) => {
-    Person.findById(request.params.id).
-        then(person => response.json(person))
+app.get(baseURL + ':id', (req, res) => {
+    Person.findById(req.params.id).
+        then(person => res.json(person))
 })
 
 // needs new route handler
-app.delete(baseURL + '/:id', (req, res) => {
-    const id = Number(req.params.id)
-
-    persons = persons.filter(p => p.id !== id)
-    res.status(204).end()
+app.delete(baseURL + ':id', (req, res, next) => {
+    Person.findByIdAndRemove(req.params.id)
+        .then(result => res.status(204).end())
+        .catch(err => next(err))
 })
 
-app.post(baseURL, (request, response) => {
-    const body = request.body
+app.post(baseURL, (req, res) => {
+    const body = req.body
     // const personExists = persons.find(p => p.name === body.name)
 
     if (!body.name) {
-        return response.status(400).json({
+        return res.status(400).json({
             error: 'name property must be present'
         })
     }
 
     if (!body.number) {
-        return response.status(400).json({
+        return res.status(400).json({
             error: 'number property must be present'
         })
     }
@@ -88,6 +87,13 @@ app.post(baseURL, (request, response) => {
     })
 
     newPerson.save().then(saved_person => {
-        response.json(saved_person)
+        res.json(saved_person)
     })
 })
+
+
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: 'unknown endpoint'})
+}
+
+app.use(unknownEndpoint)
