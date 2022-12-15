@@ -4,13 +4,14 @@
   "description": "allows users to save information about interesting blogs they have stumbled across on the internet",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest --verbose",
     "dev": "nodemon index.js",
     "start": "node index.jx"
   },
   "author": "Alireza Kheradmand",
   "license": "ISC",
   "devDependencies": {
+    "jest": "^29.3.1",
     "nodemon": "^2.0.20"
   },
   "dependencies": {
