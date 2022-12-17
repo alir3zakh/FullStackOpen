@@ -6,7 +6,7 @@ const helper = require('./test_helper')
 
 const api = supertest(app)
 
-beforeAll(async () => {
+beforeEach(async () => {
   await Blog.deleteMany({})
 
   const BlogObjects = helper.initialBlogs.map(b => new Blog(b))
@@ -24,6 +24,17 @@ test('blogs are returned as json', async () => {
 test('should return all blogs', async () => {
   const response = await api.get('/api/blogs')
   expect(response.body).toHaveLength(helper.initialBlogs.length)
+})
+
+test('blog identifier should exist and named id', async () => {
+  const blogs = await helper.blogsInDB();
+
+  blogs.forEach(blog => {
+    expect(blog.id).toBeDefined()
+  })
+
+  const numBlogs = new Set(blogs.map(b => b.id)).size
+  expect(numBlogs).toBe(helper.initialBlogs.length)
 })
 
 afterAll(() => mongoose.connection.close())
