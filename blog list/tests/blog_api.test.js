@@ -37,4 +37,27 @@ test('blog identifier should exist and named id', async () => {
   expect(numBlogs).toBe(helper.initialBlogs.length)
 })
 
+test('valid post request works properly', async () => {
+  const newBlog = {
+    author: 'me',
+    likes: 5,
+    url: 'test/test.test',
+    title: 'test'
+  }
+
+  const insertedBlog = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  const blogsAtEnd = await helper.blogsInDB()
+  expect(blogsAtEnd).toHaveLength(helper.initialBlogs.length + 1)
+
+  expect(blogsAtEnd).toContainEqual({
+    ...newBlog,
+    id: insertedBlog.body.id
+  })
+})
+
 afterAll(() => mongoose.connection.close())

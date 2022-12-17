@@ -6,7 +6,19 @@ blogsRouter.get('/', async (req, res) => {
   res.json(blogs)
 })
 
-blogsRouter.post('/', (req, res) => {
+blogsRouter.put('/:id', async (req, res) => {
+  const { title, author, url, likes } = req.body
+
+  const updated_blog = await Blog.findByIdAndUpdate(
+    req.params.id,
+    { title, author, url, likes },
+    { new: true, runValidators: true, context: 'query' }
+  )
+
+  res.json(updated_blog)
+})
+
+blogsRouter.post('/', async (req, res) => {
   const blog = new Blog({
     title: req.body.title,
     author: req.body.author,
@@ -14,8 +26,8 @@ blogsRouter.post('/', (req, res) => {
     likes: req.body.likes
   })
 
-  blog.save()
-    .then(result => res.status(201).json(result))
+  const result = await blog.save()
+  res.status(201).json(result)
 })
 
 module.exports = blogsRouter
