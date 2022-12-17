@@ -80,4 +80,26 @@ test('if likes is missing from blog, 0 should get inserted', async () => {
   })
 })
 
+test('blogs with missing title or url should not get inserted', async () => {
+  const noURLBlog = {
+    author: 'no url',
+    title: 'test'
+  }
+
+  const noTitleBlog = {
+    author: 'no title',
+    url: 'test/test.test'
+  }
+
+  await api
+    .post('/api/blogs')
+    .send(noURLBlog)
+    .expect(400)
+
+  await api
+    .post('/api/blogs')
+    .send(noTitleBlog)
+    .expect(400)
+})
+
 afterAll(() => mongoose.connection.close())
