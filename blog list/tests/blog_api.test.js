@@ -60,4 +60,24 @@ test('valid post request works properly', async () => {
   })
 })
 
+test('if likes is missing from blog, 0 should get inserted', async () => {
+  const dummyBlog = {
+    author: 'me',
+    url: 'test/test.test',
+    title: 'test'
+  }
+
+  const insertedBlog = await api
+    .post('/api/blogs')
+    .send(dummyBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+
+  expect([insertedBlog.body]).toContainEqual({
+    ...dummyBlog,
+    likes: 0,
+    id: insertedBlog.body.id
+  })
+})
+
 afterAll(() => mongoose.connection.close())
