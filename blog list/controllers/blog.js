@@ -1,17 +1,19 @@
 const blogsRouter = require('express').Router()
-const Blog = require('../models/blog');
+const Blog = require('../models/blog')
+const User = require('../models/user')
 
 blogsRouter.get('/', async (req, res) => {
   const blogs = await Blog.find({})
+    .populate('user', {name: 1, username: 1})
   res.json(blogs)
 })
 
 blogsRouter.put('/:id', async (req, res) => {
-  const { title, author, url, likes } = req.body
+  const { title, author, url, likes, user } = req.body
 
   const updated_blog = await Blog.findByIdAndUpdate(
     req.params.id,
-    { title, author, url, likes },
+    { title, author, url, likes, user },
     { new: true, runValidators: true, context: 'query' }
   )
 
@@ -19,15 +21,22 @@ blogsRouter.put('/:id', async (req, res) => {
 })
 
 blogsRouter.post('/', async (req, res) => {
+  const randomUser = await User.findOne()
+  console.log(randomUser)
+
   const blog = new Blog({
     title: req.body.title,
     author: req.body.author,
     url: req.body.url,
-    likes: req.body.likes || 0
+    likes: req.body.likes || 0,
+    user: randomUser._id
   })
 
-  const result = await blog.save()
-  res.status(201).json(result)
+  const savedBlog = await blog.save()
+  randomUser.blogs = randomUser.blogs.concat(savedBlog._id)
+  await randomUser.save()
+
+  res.status(201).json(savedBlog)
 })
 
 blogsRouter.delete('/:id', async (req, res) => {
