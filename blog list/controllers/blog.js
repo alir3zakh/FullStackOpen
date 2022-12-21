@@ -3,6 +3,7 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
 
+
 blogsRouter.get('/', async (req, res) => {
   const blogs = await Blog.find({})
     .populate('user', { name: 1, username: 1 })
@@ -26,7 +27,7 @@ blogsRouter.post('/', async (req, res) => {
 
   if (!decodedToken) {
     return response.status(401)
-      .json({ error: 'token missing or invalid' })
+      .json({ error: 'invalid or missing token' })
   }
 
   const user = await User.findById(decodedToken.id)
@@ -48,7 +49,24 @@ blogsRouter.post('/', async (req, res) => {
 })
 
 blogsRouter.delete('/:id', async (req, res) => {
+  const decodedToken = jwt.verify(req.token, process.env.SECRET)
+
+
+  if (!decodedToken) {
+    return response.status(401) // 401: Unauthorized
+      .json({ error: 'invalid or missing token' })
+  }
+
+  const blog = await Blog.findById(req.params.id)
+  const user = await User.findById(decodedToken.id)
+
+  if (user._id.toString() !== blog.user.toString()) {
+    return res.status(403) // 403: Forbidden
+      .json({ error: 'invalid permission' })
+  }
+
   await Blog.findByIdAndRemove(req.params.id)
+
   res.status(204).end() // 204: no content
 })
 
