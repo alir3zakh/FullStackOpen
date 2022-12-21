@@ -22,7 +22,6 @@ blogsRouter.put('/:id', async (req, res) => {
 
 blogsRouter.post('/', async (req, res) => {
   const randomUser = await User.findOne()
-  console.log(randomUser)
 
   const blog = new Blog({
     title: req.body.title,
