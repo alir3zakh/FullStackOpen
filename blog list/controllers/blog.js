@@ -2,6 +2,7 @@ const blogsRouter = require('express').Router()
 const Blog = require('../models/blog')
 const User = require('../models/user')
 const jwt = require('jsonwebtoken')
+const { userExtractor } = require('../utils/middleware')
 
 
 blogsRouter.get('/', async (req, res) => {
@@ -22,15 +23,8 @@ blogsRouter.put('/:id', async (req, res) => {
   res.json(updated_blog)
 })
 
-blogsRouter.post('/', async (req, res) => {
-  const decodedToken = jwt.verify(req.token, process.env.SECRET)
-
-  if (!decodedToken) {
-    return response.status(401)
-      .json({ error: 'invalid or missing token' })
-  }
-
-  const user = await User.findById(decodedToken.id)
+blogsRouter.post('/', userExtractor, async (req, res) => {
+  const user = req.user
 
   const blog = new Blog({
     title: req.body.title,
@@ -48,17 +42,9 @@ blogsRouter.post('/', async (req, res) => {
   res.status(201).json(savedBlog)
 })
 
-blogsRouter.delete('/:id', async (req, res) => {
-  const decodedToken = jwt.verify(req.token, process.env.SECRET)
-
-
-  if (!decodedToken) {
-    return response.status(401) // 401: Unauthorized
-      .json({ error: 'invalid or missing token' })
-  }
-
+blogsRouter.delete('/:id', userExtractor, async (req, res) => {
   const blog = await Blog.findById(req.params.id)
-  const user = await User.findById(decodedToken.id)
+  const user = req.user
 
   if (user._id.toString() !== blog.user.toString()) {
     return res.status(403) // 403: Forbidden
