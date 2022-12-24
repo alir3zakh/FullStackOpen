@@ -10,26 +10,44 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
 
+  useEffect(() => {
+    blogService.getAll().then(blogs =>
+      setBlogs(blogs)
+    )
+  }, [])
+
+  useEffect(() => {
+    const userJSON = window.localStorage
+      .getItem('loggedNoteappUser')
+    if (userJSON) {
+      const user = JSON.parse(userJSON)
+      setUser(user)
+    }
+  }, [])
+
   const loginHandler = async (event) => {
     event.preventDefault()
 
     try {
       const user = await loginService.login({ username, password })
+      window.localStorage.setItem(
+        'loggedNoteappUser', JSON.stringify(user)
+      )
+
       setUser(user)
       setUsername('')
       setPassword('')
 
 
     } catch (error) {
-      // console.error(error)
+      console.error(error)
     }
   }
 
-  useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs(blogs)
-    )
-  }, [])
+  const logoutHandler = () => {
+    window.localStorage.clear()
+    setUser(null)
+  }
 
   const loginForm = () => (
     <form onSubmit={loginHandler}>
@@ -58,15 +76,14 @@ const App = () => {
 
       {blogs.map(blog =>
         <Blog key={blog.id} blog={blog} />
-      )}
+        )}
+      <button onClick={logoutHandler}>logout</button>
     </div>
   )
 
   return (
     <div>
       {user === null ? loginForm() : blogList()}
-
-
     </div>
   )
 }
