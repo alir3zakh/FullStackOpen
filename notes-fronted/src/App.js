@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 
 import Note from './components/Note'
 import Notification from './components/Notification';
+import LoginForm from './components/LoginForm'
+
 import noteService from './services/note'
 import loginService from './services/login'
 
@@ -14,6 +16,7 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
+  const [loginVisible, setLoginVisible] = useState(false)
 
   useEffect(() => {
     noteService.getAll()
@@ -97,28 +100,35 @@ const App = () => {
     setNewNote(event.target.value)
   }
 
-  // other vars / functions
+  // other functions
   const notesToShow = (showAll ?
     notes :
     notes.filter(note => note.important))
 
-  const loginForm = () => (
-    <form onSubmit={loginHandler}>
+
+  const loginForm = () => {
+    const hideWhenVisible = { display: loginVisible ? 'none' : '' }
+    const showWhenVisible = { display: loginVisible ? '' : 'none' }
+
+    return (
       <div>
-        username:
-        <input value={username} name="Username"
-          onChange={({ target }) => setUsername(target.value)}
-        />
+        <div style={hideWhenVisible}>
+          <button onClick={() => setLoginVisible(true)}>log in</button>
+        </div>
+        <div style={showWhenVisible}>
+          <LoginForm
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={loginHandler}
+          />
+          <button onClick={() => setLoginVisible(false)}>cancel</button>
+        </div>
       </div>
-      <div>
-        password:
-        <input value={password} name="Password" type="password"
-          onChange={({ target }) => setPassword(target.value)}
-        />
-      </div>
-      <button type='Submit'>Login</button>
-    </form>
-  )
+    )
+  }
+
 
   const noteForm = () => (
     <form onSubmit={addNote}>
@@ -162,6 +172,8 @@ const App = () => {
     </div>
   )
 }
+
+
 
 
 const Footer = () => {
