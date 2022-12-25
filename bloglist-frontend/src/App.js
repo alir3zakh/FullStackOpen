@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 
 import Blog from './components/Blog'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from "./services/login"
 
@@ -13,6 +14,8 @@ const App = () => {
   const [title, setTitle] = useState('')
   const [author, setAuthor] = useState('')
   const [url, setUrl] = useState('')
+
+  const [notifMessage, setNotifMessage] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -42,8 +45,20 @@ const App = () => {
       setUser(user)
       setUsername('')
       setPassword('')
-    } catch (error) {
-      console.error(error)
+
+      setNotifMessage('success Successfully loged in')
+      setTimeout(() => {
+        setNotifMessage(null)
+      }, 5000);
+    }
+
+    catch (exception) {
+      console.error(exception)
+      setNotifMessage('error Invalid Username or password')
+
+      setTimeout(() => {
+        setNotifMessage(null)
+      }, 5000);
     }
   }
 
@@ -55,14 +70,30 @@ const App = () => {
   const createHandler = async (event) => {
     event.preventDefault()
 
-    const newBlog = { title, author, url }
-    const insertedBlog = await blogService.create(newBlog)
+    try {
+      const newBlog = { title, author, url }
+      const insertedBlog = await blogService.create(newBlog)
 
-    setBlogs(blogs.concat(insertedBlog))
+      setBlogs(blogs.concat(insertedBlog))
 
-    setTitle('')
-    setAuthor('')
-    setUrl('')
+      setTitle('')
+      setAuthor('')
+      setUrl('')
+
+      setNotifMessage(`success Blog: "${title}" by ${author} added`)
+      setTimeout(() => {
+        setNotifMessage(null)
+      }, 5000);
+    }
+
+    catch(exception) {
+      console.error(exception)
+      setNotifMessage('error ' + exception)
+
+      setTimeout(() => {
+        setNotifMessage(null)
+      }, 5000);
+    }
   }
 
   const loginForm = () => (
@@ -129,6 +160,7 @@ const App = () => {
 
   return (
     <div>
+      <Notification message={notifMessage} />
       {user === null ? loginForm() : blogList()}
     </div>
   )
