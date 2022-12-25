@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 
 import Note from './components/Note'
-import Notification from './components/Notification';
+import Notification from './components/Notification'
 import LoginForm from './components/LoginForm'
+import Togglable from './components/Togglable'
+import NoteForm from './components/NoteForm'
+import Footer from './components/Footer'
 
 import noteService from './services/note'
 import loginService from './services/login'
@@ -16,13 +19,10 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [loginVisible, setLoginVisible] = useState(false)
 
   useEffect(() => {
     noteService.getAll()
-      .then(initialNotes =>
-        setNotes(initialNotes)
-      )
+      .then(initialNotes => setNotes(initialNotes))
   }, [])
   console.log('render', notes.length, 'notes')
 
@@ -96,49 +96,10 @@ const App = () => {
       })
   }
 
-  const changeNoteHandle = (event) => {
-    setNewNote(event.target.value)
-  }
-
   // other functions
   const notesToShow = (showAll ?
     notes :
     notes.filter(note => note.important))
-
-
-  const loginForm = () => {
-    const hideWhenVisible = { display: loginVisible ? 'none' : '' }
-    const showWhenVisible = { display: loginVisible ? '' : 'none' }
-
-    return (
-      <div>
-        <div style={hideWhenVisible}>
-          <button onClick={() => setLoginVisible(true)}>log in</button>
-        </div>
-        <div style={showWhenVisible}>
-          <LoginForm
-            username={username}
-            password={password}
-            handleUsernameChange={({ target }) => setUsername(target.value)}
-            handlePasswordChange={({ target }) => setPassword(target.value)}
-            handleSubmit={loginHandler}
-          />
-          <button onClick={() => setLoginVisible(false)}>cancel</button>
-        </div>
-      </div>
-    )
-  }
-
-
-  const noteForm = () => (
-    <form onSubmit={addNote}>
-      <input
-        value={newNote}
-        onChange={changeNoteHandle}
-      />
-      <button type='submit'>save</button>
-    </form>
-  )
 
   return (
     <div>
@@ -147,10 +108,25 @@ const App = () => {
       <Notification message={errorMessage} />
 
       {user === null ?
-        loginForm() :
+        <Togglable buttonLabel='Login'>
+          <LoginForm
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={loginHandler}
+          />
+        </Togglable>
+        :
         <div>
           <p>{user.name} logged-in</p>
-          {noteForm()}
+          <Togglable buttonLabel="new note">
+            <NoteForm
+              onSubmit={addNote}
+              value={newNote}
+              changeNoteHandle={({ target }) => setNewNote(target.value)}
+            />
+          </Togglable>
         </div>
       }
 
@@ -169,24 +145,6 @@ const App = () => {
         )}
       </ul>
       <Footer />
-    </div>
-  )
-}
-
-
-
-
-const Footer = () => {
-  const footerStyle = {
-    color: 'green',
-    fontStyle: 'italic',
-    fontSize: 16
-  }
-
-  return (
-    <div style={footerStyle}>
-      <br />
-      <em>Note app, Department of Computer Science, University of Helsinki 2022</em>
     </div>
   )
 }
