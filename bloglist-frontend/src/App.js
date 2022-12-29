@@ -92,6 +92,32 @@ const App = () => {
     }
   }
 
+  const updateBlog = async (blogId) => {
+    try {
+      const blog = blogs.find(b => b.id === blogId)
+
+      const changedBlog = {
+        user: blog.user.id,
+        likes: blog.likes + 1,
+        author: blog.author,
+        title: blog.title,
+        url: blog.url
+      }
+
+      const updatedBlog = await blogService.update(changedBlog, blogId)
+
+      setBlogs(blogs.map(b => b.id === blogId ? updatedBlog : b))
+    }
+    catch (exception) {
+      console.error(exception)
+      setNotifMessage('error ' + exception)
+
+      setTimeout(() => {
+        setNotifMessage(null)
+      }, 5000);
+    }
+  }
+
   const loginForm = () => (
     <form onSubmit={loginHandler}>
       <h2>log in to application</h2>
@@ -124,7 +150,7 @@ const App = () => {
       </Togglable>
 
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
       )}
 
     </div>
