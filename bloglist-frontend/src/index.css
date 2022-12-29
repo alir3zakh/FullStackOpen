@@ -7,6 +7,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+p {
+  margin: 3px;
+}
+
 .notification {
   background: lightgrey;
   font-size: 15px;

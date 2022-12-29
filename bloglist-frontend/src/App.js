@@ -119,6 +119,27 @@ const App = () => {
     }
   }
 
+  const removeBlog = async (blogId) => {
+    try {
+      await blogService.remove(blogId)
+      setBlogs(blogs.filter(b => b.id !== blogId))
+
+      setNotifMessage(
+        `success blog removed`)
+      setTimeout(() => {
+        setNotifMessage(null)
+      }, 5000);
+
+    } catch (exception) {
+      console.error(exception)
+      setNotifMessage('error ' + exception)
+
+      setTimeout(() => {
+        setNotifMessage(null)
+      }, 5000);
+    }
+  }
+
   const loginForm = () => (
     <form onSubmit={loginHandler}>
       <h2>log in to application</h2>
@@ -151,7 +172,13 @@ const App = () => {
       </Togglable>
 
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} updateBlog={updateBlog} />
+        <Blog
+          key={blog.id}
+          blog={blog}
+          username={user.username}
+          updateBlog={updateBlog}
+          removeBlog={removeBlog}
+        />
       )}
 
     </div>

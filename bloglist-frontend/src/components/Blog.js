@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const Blog = ({ blog, updateBlog }) => {
+const Blog = ({ blog, updateBlog, removeBlog, username }) => {
   const [display, setDisplay] = useState(false)
 
   const blogStyle = {
@@ -9,6 +9,12 @@ const Blog = ({ blog, updateBlog }) => {
     border: 'solid',
     borderWidth: 1,
     marginBottom: 5
+  }
+
+  const confirmRemove = () => {
+    if (window.confirm(`Remove ${blog.title} by ${blog.author}?`)) {
+      removeBlog(blog.id)
+    }
   }
 
   const displayButton = () => (
@@ -21,21 +27,25 @@ const Blog = ({ blog, updateBlog }) => {
     <div style={blogStyle}>
       {display ?
         <>
-          {blog.title} {displayButton()}
-          <br />
-          {blog.url}
-          <br />
-          {blog.likes}
-          <button onClick={() => updateBlog(blog.id)}>like</button>
-          <br />
-          {blog.author}
-        </> :
-        <>
+          <p>{blog.title} {displayButton()} </p>
+          <p>{blog.url}</p>
+          <p>{blog.likes} {' '}
+          <button onClick={() => updateBlog(blog.id)}>
+            like
+          </button></p>
+          <p>{blog.author}</p>
+          {blog.user.username === username
+            ? <button onClick={() => confirmRemove()}>
+              remove
+            </button>
+            : <></>
+          }
+        </>
+        : <>
           {blog.title} {blog.author} {displayButton()}
         </>
       }
       {' '}
-
     </div>
   )
 }
