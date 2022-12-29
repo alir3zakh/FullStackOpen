@@ -98,7 +98,7 @@ const App = () => {
       {user === null ?
         <Togglable buttonLabel='Login'>
           <LoginForm
-            login={login}
+            handleSubmit={login}
           />
         </Togglable>
         :
