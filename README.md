@@ -1,3 +1,3 @@
 # fullstackopen
 
-Solutions to exercises of full-stack-open 2022
+Solutions to exercises of fullstackopen
